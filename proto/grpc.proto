@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = ".;proto";
+
+// Gmail Unread.
+message GmailUnreadRequest {}
+message GmailUnreadResponse {
+    int32 value = 1;
+}
+
+// Gmail Authentication.
+message GmailAuthURLRequest{}
+message GmailAuthURLResponse{
+    string authURL = 1;
+}
+message GmailAuthCodeRequest {
+    string authCode = 1;
+}
+message GmailAuthCodeResponse {}
+
+// Available updates.
+message AvailableUpdatesRequest {}
+message AvailableUpdatesResponse {
+    int32 value = 1;
+}
+
+// Temperature.
+message TemperatureRequest{}
+message TemperatureResponse{
+    int32 value = 1;
+}
+
+// Network name
+message ESSIDRequest{}
+message ESSIDResponse{
+    string value = 1;
+}
+
+// Public IP address.
+message IPAddressRequest{}
+message IPAddressResponse{
+    string value = 1;
+}
+
+// Config.
+message ConfigRequest{}
+message ConfigResponse{
+    string gmail_credentials = 1;
+    string gmail_token = 2;
+}
+
+service Tin {
+    rpc GmailUnread(GmailUnreadRequest) returns (GmailUnreadResponse);
+    rpc GmailAuthURL(GmailAuthURLRequest) returns (GmailAuthURLResponse);
+    rpc GmailAuthCode(GmailAuthCodeRequest) returns (GmailAuthCodeResponse);
+    rpc AvailableUpdates(AvailableUpdatesRequest) returns (AvailableUpdatesResponse);
+    rpc TemperatureCelsius(TemperatureRequest) returns (TemperatureResponse);
+    rpc TemperatureFahrenheit(TemperatureRequest) returns (TemperatureResponse);
+    rpc ESSID(ESSIDRequest) returns (ESSIDResponse);
+    rpc IPAddress(IPAddressRequest) returns (IPAddressResponse);
+    rpc Config(ConfigRequest) returns (ConfigResponse);
+}
