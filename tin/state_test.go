@@ -3,7 +3,6 @@ package tin
 import (
 	"reflect"
 	"testing"
-	"time"
 )
 
 func TestNewState(t *testing.T) {
@@ -59,11 +58,15 @@ func TestStateSubscribe(t *testing.T) {
 func TestStatePublish(t *testing.T) {
 	s := NewState()
 	ch := s.Subscribe()
-	s.publish(4)
-	s.publish(17)
-	s.publish(7)
+	key := StateKey("key")
 
-	time.Sleep(time.Millisecond * 100)
+	s.publish(StateMessage{key: key, value: 4})
+	s.publish(StateMessage{key: key, value: 17})
+	s.publish(StateMessage{key: key, value: 1})
+	s.publish(StateMessage{key: key, value: 2})
+	s.publish(StateMessage{key: key, value: 3})
+	s.publish(StateMessage{key: key, value: 4})
+	s.publish(StateMessage{key: key, value: 7})
 
 	want := 7
 	got := <-ch

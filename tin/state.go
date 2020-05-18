@@ -2,7 +2,6 @@ package tin
 
 import (
 	"errors"
-	"reflect"
 	"sync"
 	"time"
 )
@@ -23,7 +22,7 @@ type State struct {
 
 	// Pubsub.
 	subscribers []chan StateValue
-	msgCh       chan interface{}
+	msgCh       chan StateMessage
 }
 
 // StateKey represents the key of a state value.
@@ -32,12 +31,18 @@ type StateKey string
 // StateValue represents the value of a state.
 type StateValue interface{}
 
+// StateMessage holds a StateKey and StateValue.
+type StateMessage struct {
+	key   StateKey
+	value StateValue
+}
+
 // NewState returns tin.State
 func NewState() *State {
 	s := &State{
 		values:      make(map[StateKey]StateValue),
 		subscribers: []chan StateValue{},
-		msgCh:       make(chan interface{}, 1),
+		msgCh:       make(chan StateMessage, 1),
 	}
 
 	go s.work()
@@ -65,7 +70,7 @@ func (s *State) Set(k StateKey, v StateValue) {
 	s.Lock()
 	s.values[k] = v
 	s.Unlock()
-	s.publish(v)
+	s.publish(StateMessage{key: k, value: v})
 }
 
 // Subscribe creates and return a read-only channel that can receive state updates.
@@ -79,8 +84,8 @@ func (s *State) Subscribe() <-chan StateValue {
 }
 
 // publish sends the message to the channel.
-func (s *State) publish(msg interface{}) {
-	s.msgCh <- msg
+func (s *State) publish(m StateMessage) {
+	s.msgCh <- m
 }
 
 // work proccesses messages and sends them to subscribers after a given duration.
@@ -91,31 +96,29 @@ func (s *State) publish(msg interface{}) {
 func (s *State) work() {
 	pending := struct {
 		sync.Mutex
-		messages map[string]*time.Timer
+		messages map[StateKey]*time.Timer
 	}{
-		messages: map[string]*time.Timer{},
+		messages: map[StateKey]*time.Timer{},
 	}
 
 	for v := range s.msgCh {
-		id := reflect.TypeOf(v).String()
-
 		pending.Lock()
-		if m, exists := pending.messages[id]; exists {
+		if m, exists := pending.messages[v.key]; exists {
 			m.Stop() // Stopping the timer from sending the message.
 		}
 
 		// Adding a pending message, potentially replacing the previous one.
-		pending.messages[id] = func(msg interface{}) *time.Timer {
+		pending.messages[v.key] = func(msg StateValue) *time.Timer {
 			return time.AfterFunc(time.Second, func() {
 				for _, s := range s.subscribers {
 					s <- msg
 				}
 
 				pending.Lock()
-				delete(pending.messages, id) // Cleanup after sending the message.
+				delete(pending.messages, v.key) // Cleanup after sending the message.
 				pending.Unlock()
 			})
-		}(v)
+		}(v.value)
 		pending.Unlock()
 	}
 }
