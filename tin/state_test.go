@@ -21,7 +21,7 @@ func TestStateSetAndGet(t *testing.T) {
 
 	tt := []struct {
 		key  StateKey
-		want interface{}
+		want StateValue
 	}{
 		{
 			"number",
@@ -48,7 +48,7 @@ func TestStateSetAndGet(t *testing.T) {
 
 func TestStateSubscribe(t *testing.T) {
 	s := NewState()
-	want := make(<-chan interface{}, 1)
+	want := make(<-chan StateValue, 1)
 	got := s.Subscribe()
 
 	if reflect.TypeOf(got) != reflect.TypeOf(want) {
@@ -67,7 +67,6 @@ func TestStatePublish(t *testing.T) {
 
 	want := 7
 	got := <-ch
-
 	if got != want {
 		t.Errorf("want %v, got %v", want, got)
 	}

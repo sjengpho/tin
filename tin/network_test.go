@@ -65,7 +65,7 @@ func TestNewNetworkService(t *testing.T) {
 
 func TestNetworkSubscribe(t *testing.T) {
 	s := NewNetworkService(essidLookupMock{}, publicIPLookupMock{}, log.New(ioutil.Discard, "", log.Flags()))
-	want := make(<-chan interface{}, 1)
+	want := make(<-chan StateValue, 1)
 	got := s.Subscribe()
 
 	if reflect.TypeOf(got) != reflect.TypeOf(want) {

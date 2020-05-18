@@ -67,7 +67,7 @@ func NewPackageManagerService(m PackageManager, l *log.Logger) *PackageManagerSe
 }
 
 // Subscribe returns a read-only channel.
-func (s *PackageManagerService) Subscribe() <-chan interface{} {
+func (s *PackageManagerService) Subscribe() <-chan StateValue {
 	return s.state.Subscribe()
 }
 

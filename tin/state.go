@@ -19,21 +19,24 @@ var ErrEntryNotExist = errors.New("Entry doesn't exist")
 // In case of bursts only the last message will be sent to the subscribers.
 type State struct {
 	sync.RWMutex
-	values map[StateKey]interface{}
+	values map[StateKey]StateValue
 
 	// Pubsub.
-	subscribers []chan interface{}
+	subscribers []chan StateValue
 	msgCh       chan interface{}
 }
 
-// StateKey represents the key of an entry of state values.
+// StateKey represents the key of a state value.
 type StateKey string
+
+// StateValue represents the value of a state.
+type StateValue interface{}
 
 // NewState returns tin.State
 func NewState() *State {
 	s := &State{
-		values:      make(map[StateKey]interface{}),
-		subscribers: []chan interface{}{},
+		values:      make(map[StateKey]StateValue),
+		subscribers: []chan StateValue{},
 		msgCh:       make(chan interface{}, 1),
 	}
 
@@ -42,10 +45,10 @@ func NewState() *State {
 	return s
 }
 
-// Get returns the state value for the given tin.StateKey.
+// Get returns a tin.StateValue for the given tin.StateKey.
 //
 // An error will be returned if an entry doesn't exists.
-func (s *State) Get(k StateKey) (interface{}, error) {
+func (s *State) Get(k StateKey) (StateValue, error) {
 	s.RLock()
 	defer s.RUnlock()
 
@@ -58,7 +61,7 @@ func (s *State) Get(k StateKey) (interface{}, error) {
 }
 
 // Set updates the state and sends the value to the subscribers.
-func (s *State) Set(k StateKey, v interface{}) {
+func (s *State) Set(k StateKey, v StateValue) {
 	s.Lock()
 	s.values[k] = v
 	s.Unlock()
@@ -66,9 +69,9 @@ func (s *State) Set(k StateKey, v interface{}) {
 }
 
 // Subscribe creates and return a read-only channel that can receive state updates.
-func (s *State) Subscribe() <-chan interface{} {
+func (s *State) Subscribe() <-chan StateValue {
 	s.Lock()
-	ch := make(chan interface{}, 1)
+	ch := make(chan StateValue, 1)
 	s.subscribers = append(s.subscribers, ch)
 	s.Unlock()
 

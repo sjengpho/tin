@@ -58,7 +58,7 @@ func NewMailService(p MailProvider, l *log.Logger) *MailService {
 }
 
 // Subscribe returns a read-only channel.
-func (s *MailService) Subscribe() <-chan interface{} {
+func (s *MailService) Subscribe() <-chan StateValue {
 	return s.state.Subscribe()
 }
 
