@@ -101,24 +101,26 @@ func (s *State) work() {
 		messages: map[StateKey]*time.Timer{},
 	}
 
-	for v := range s.msgCh {
+	for msg := range s.msgCh {
 		pending.Lock()
-		if m, exists := pending.messages[v.key]; exists {
+		if m, exists := pending.messages[msg.key]; exists {
 			m.Stop() // Stopping the timer from sending the message.
 		}
 
 		// Adding a pending message, potentially replacing the previous one.
-		pending.messages[v.key] = func(msg StateValue) *time.Timer {
+		pending.messages[msg.key] = func(msg StateMessage) *time.Timer {
 			return time.AfterFunc(time.Second, func() {
+				s.RLock()
 				for _, s := range s.subscribers {
-					s <- msg
+					s <- msg.value
 				}
+				s.RUnlock()
 
 				pending.Lock()
-				delete(pending.messages, v.key) // Cleanup after sending the message.
+				delete(pending.messages, msg.key) // Cleanup after sending the message.
 				pending.Unlock()
 			})
-		}(v.value)
+		}(msg)
 		pending.Unlock()
 	}
 }
