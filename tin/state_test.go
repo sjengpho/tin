@@ -47,7 +47,7 @@ func TestStateSetAndGet(t *testing.T) {
 
 func TestStateSubscribe(t *testing.T) {
 	s := NewState()
-	want := make(<-chan StateValue, 1)
+	want := StateSubscription{}
 	got := s.Subscribe()
 
 	if reflect.TypeOf(got) != reflect.TypeOf(want) {
@@ -57,7 +57,7 @@ func TestStateSubscribe(t *testing.T) {
 
 func TestStatePublish(t *testing.T) {
 	s := NewState()
-	ch := s.Subscribe()
+	subscription := s.Subscribe()
 	key := StateKey("key")
 
 	s.publish(StateMessage{key: key, value: 4})
@@ -69,7 +69,7 @@ func TestStatePublish(t *testing.T) {
 	s.publish(StateMessage{key: key, value: 7})
 
 	want := 7
-	got := <-ch
+	got := <-subscription.Channel
 	if got != want {
 		t.Errorf("want %v, got %v", want, got)
 	}

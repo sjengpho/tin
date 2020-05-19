@@ -82,8 +82,8 @@ func NewNetworkService(n ESSIDLookup, p PublicIPLookup, l *log.Logger) *NetworkS
 	return s
 }
 
-// Subscribe returns a read-only channel.
-func (s *NetworkService) Subscribe() <-chan StateValue {
+// Subscribe returns a tin.StateSubscription.
+func (s *NetworkService) Subscribe() StateSubscription {
 	return s.state.Subscribe()
 }
 

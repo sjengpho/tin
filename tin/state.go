@@ -21,7 +21,7 @@ type State struct {
 	values map[StateKey]StateValue
 
 	// Pubsub.
-	subscribers []chan StateValue
+	subscribers map[chan StateValue]chan StateValue
 	msgCh       chan StateMessage
 }
 
@@ -37,11 +37,19 @@ type StateMessage struct {
 	value StateValue
 }
 
+// StateSubscription contains a read-only channel that receives changes of every state value.
+//
+// Close removes the subscription and closes the channel.
+type StateSubscription struct {
+	Channel <-chan StateValue
+	Close   func()
+}
+
 // NewState returns tin.State
 func NewState() *State {
 	s := &State{
 		values:      make(map[StateKey]StateValue),
-		subscribers: []chan StateValue{},
+		subscribers: make(map[chan StateValue]chan StateValue),
 		msgCh:       make(chan StateMessage, 1),
 	}
 
@@ -73,14 +81,22 @@ func (s *State) Set(k StateKey, v StateValue) {
 	s.publish(StateMessage{key: k, value: v})
 }
 
-// Subscribe creates and return a read-only channel that can receive state updates.
-func (s *State) Subscribe() <-chan StateValue {
+// Subscribe creates and returns a tin.StateSubscription.
+func (s *State) Subscribe() StateSubscription {
 	s.Lock()
 	ch := make(chan StateValue, 1)
-	s.subscribers = append(s.subscribers, ch)
+	s.subscribers[ch] = ch
 	s.Unlock()
 
-	return ch
+	return StateSubscription{
+		Channel: ch,
+		Close: func() {
+			s.Lock()
+			close(ch)
+			delete(s.subscribers, ch)
+			s.Unlock()
+		},
+	}
 }
 
 // publish sends the message to the channel.

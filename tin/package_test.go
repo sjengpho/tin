@@ -49,7 +49,7 @@ func TestNewPackageManagerService(t *testing.T) {
 
 func TestPackageSubscribe(t *testing.T) {
 	s := NewPackageManagerService(packageManagerMock{}, log.New(os.Stdout, "", log.Flags()))
-	want := make(<-chan StateValue, 1)
+	want := StateSubscription{}
 	got := s.Subscribe()
 
 	if reflect.TypeOf(got) != reflect.TypeOf(want) {

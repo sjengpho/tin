@@ -49,7 +49,7 @@ func TestNewMailService(t *testing.T) {
 
 func TestMailSubscribe(t *testing.T) {
 	s := NewMailService(mailProviderMock{}, log.New(os.Stdout, "", log.Flags()))
-	want := make(<-chan StateValue, 1)
+	want := StateSubscription{}
 	got := s.Subscribe()
 
 	if reflect.TypeOf(got) != reflect.TypeOf(want) {

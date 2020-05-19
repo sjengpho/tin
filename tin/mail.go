@@ -57,8 +57,8 @@ func NewMailService(p MailProvider, l *log.Logger) *MailService {
 	return s
 }
 
-// Subscribe returns a read-only channel.
-func (s *MailService) Subscribe() <-chan StateValue {
+// Subscribe returns a tin.StateSubscription.
+func (s *MailService) Subscribe() StateSubscription {
 	return s.state.Subscribe()
 }
 
