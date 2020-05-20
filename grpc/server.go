@@ -121,8 +121,10 @@ func (s *Server) IPAddress(c context.Context, r *pb.IPAddressRequest) (*pb.IPAdd
 // Config returns a pb.Config.
 func (s *Server) Config(c context.Context, r *pb.ConfigRequest) (*pb.ConfigResponse, error) {
 	resp := &pb.ConfigResponse{
+		Config: &pb.Config{
 		GmailCredentials: s.config.GmailCredentials,
 		GmailToken:       s.config.GmailToken,
+		},
 	}
 	return resp, nil
 }

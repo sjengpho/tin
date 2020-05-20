@@ -4,9 +4,11 @@ package tin;
 
 option go_package = ".;pb";
 
-message ConfigRequest {}
-
-message ConfigResponse {
+message Config {
   string gmail_credentials = 1;
   string gmail_token = 2;
 }
+
+message ConfigRequest {}
+
+message ConfigResponse { Config config = 1; }

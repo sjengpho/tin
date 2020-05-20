@@ -24,9 +24,9 @@ func (s *gmailCommander) Login(c *grpc.Client) {
 	authURL, err := c.GmailAuthURL()
 	if err != nil {
 		credentialsSuggestion := "Place the credentials.json at ~/.config/tin/gmail/credentials.json."
-		if c, err := c.Config(); err == nil {
+		if r, err := c.Config(); err == nil {
 			fmt.Println(c)
-			credentialsSuggestion = fmt.Sprintf("Place the credentials.json at %v", c.GetGmailCredentials())
+			credentialsSuggestion = fmt.Sprintf("Place the credentials.json at %v", r.Config.GetGmailCredentials())
 		}
 
 		fmt.Println("Failed generating the authorization url")
