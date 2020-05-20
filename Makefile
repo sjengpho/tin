@@ -1,5 +1,6 @@
 .DEFAULT_GOAL := build
-PROTO_OUTPUT := ./proto
+PROTO_INPUT := proto/proto
+PROTO_OUTPUT := proto/pb
 GO_BIN := $(or $(GOBIN),$(HOME)/go/bin)
 
 build:
@@ -14,4 +15,4 @@ test:
 	go test ./...
 
 protoc:
-	protoc -I proto ./proto/grpc.proto --go_out=plugins=grpc:$(PROTO_OUTPUT)
+	protoc --proto_path=$(PROTO_INPUT) $(PROTO_INPUT)/*.proto --go_out=plugins=grpc:$(PROTO_OUTPUT)

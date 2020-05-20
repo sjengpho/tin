@@ -3,15 +3,16 @@ package grpc
 import (
 	"context"
 	"fmt"
+	"io"
 	"time"
 
-	"github.com/sjengpho/tin/proto"
+	"github.com/sjengpho/tin/proto/pb"
 	"google.golang.org/grpc"
 )
 
 // Client represents the GRPC client.
 type Client struct {
-	client proto.TinClient
+	client pb.TinServiceClient
 	conn   *grpc.ClientConn
 }
 
@@ -26,12 +27,12 @@ func NewClient(address string) (*Client, error) {
 		return nil, fmt.Errorf("failled connecting to %v: %w", address, err)
 	}
 
-	return &Client{conn: conn, client: proto.NewTinClient(conn)}, nil
+	return &Client{conn: conn, client: pb.NewTinServiceClient(conn)}, nil
 }
 
 // AvailableUpdates returns a integer.
 func (c *Client) AvailableUpdates() (int, error) {
-	resp, err := c.client.AvailableUpdates(context.Background(), &proto.AvailableUpdatesRequest{})
+	resp, err := c.client.AvailableUpdates(context.Background(), &pb.AvailableUpdatesRequest{})
 	if err != nil {
 		return 0, err
 	}
@@ -41,7 +42,7 @@ func (c *Client) AvailableUpdates() (int, error) {
 
 // TemperatureCelsius returns a integer.
 func (c *Client) TemperatureCelsius() (int, error) {
-	resp, err := c.client.TemperatureCelsius(context.Background(), &proto.TemperatureRequest{})
+	resp, err := c.client.TemperatureCelsius(context.Background(), &pb.TemperatureRequest{})
 	if err != nil {
 		return 0, err
 	}
@@ -51,7 +52,7 @@ func (c *Client) TemperatureCelsius() (int, error) {
 
 // TemperatureFahrenheit returns a integer.
 func (c *Client) TemperatureFahrenheit() (int, error) {
-	resp, err := c.client.TemperatureFahrenheit(context.Background(), &proto.TemperatureRequest{})
+	resp, err := c.client.TemperatureFahrenheit(context.Background(), &pb.TemperatureRequest{})
 	if err != nil {
 		return 0, err
 	}
@@ -61,7 +62,7 @@ func (c *Client) TemperatureFahrenheit() (int, error) {
 
 // GmailUnread returns a integer.
 func (c *Client) GmailUnread() (int, error) {
-	response, err := c.client.GmailUnread(context.Background(), &proto.GmailUnreadRequest{})
+	response, err := c.client.GmailUnread(context.Background(), &pb.GmailUnreadRequest{})
 	if err != nil {
 		return 0, err
 	}
@@ -71,7 +72,7 @@ func (c *Client) GmailUnread() (int, error) {
 
 // GmailAuthURL returns a string.
 func (c *Client) GmailAuthURL() (string, error) {
-	response, err := c.client.GmailAuthURL(context.Background(), &proto.GmailAuthURLRequest{})
+	response, err := c.client.GmailAuthURL(context.Background(), &pb.GmailAuthURLRequest{})
 	if err != nil {
 		return "", err
 	}
@@ -81,7 +82,7 @@ func (c *Client) GmailAuthURL() (string, error) {
 
 // GmailAuthCode returns a boolean.
 func (c *Client) GmailAuthCode(code string) bool {
-	request := &proto.GmailAuthCodeRequest{AuthCode: code}
+	request := &pb.GmailAuthCodeRequest{AuthCode: code}
 	_, err := c.client.GmailAuthCode(context.Background(), request)
 
 	return err == nil
@@ -89,7 +90,7 @@ func (c *Client) GmailAuthCode(code string) bool {
 
 // ESSID returns a string.
 func (c *Client) ESSID() (string, error) {
-	resp, err := c.client.ESSID(context.Background(), &proto.ESSIDRequest{})
+	resp, err := c.client.ESSID(context.Background(), &pb.ESSIDRequest{})
 	if err != nil {
 		return "", err
 	}
@@ -99,7 +100,7 @@ func (c *Client) ESSID() (string, error) {
 
 // IPAddress returns a string.
 func (c *Client) IPAddress() (string, error) {
-	resp, err := c.client.IPAddress(context.Background(), &proto.IPAddressRequest{})
+	resp, err := c.client.IPAddress(context.Background(), &pb.IPAddressRequest{})
 	if err != nil {
 		return "", err
 	}
@@ -107,11 +108,11 @@ func (c *Client) IPAddress() (string, error) {
 	return resp.Value, nil
 }
 
-// Config returns a proto.Config.
-func (c *Client) Config() (*proto.ConfigResponse, error) {
-	resp, err := c.client.Config(context.Background(), &proto.ConfigRequest{})
+// Config returns a pb.Config.
+func (c *Client) Config() (*pb.ConfigResponse, error) {
+	resp, err := c.client.Config(context.Background(), &pb.ConfigRequest{})
 	if err != nil {
-		return &proto.ConfigResponse{}, err
+		return &pb.ConfigResponse{}, err
 	}
 
 	return resp, nil

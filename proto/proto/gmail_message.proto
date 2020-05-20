@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package tin;
+
+option go_package = ".;pb";
+
+message GmailUnreadRequest {}
+
+message GmailUnreadResponse { int32 value = 1; }
+
+message GmailAuthURLRequest {}
+
+message GmailAuthURLResponse { string authURL = 1; }
+
+message GmailAuthCodeRequest { string authCode = 1; }
+
+message GmailAuthCodeResponse {}

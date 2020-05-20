@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package tin;
+
+option go_package = ".;pb";
+
+message ConfigRequest {}
+
+message ConfigResponse {
+  string gmail_credentials = 1;
+  string gmail_token = 2;
+}

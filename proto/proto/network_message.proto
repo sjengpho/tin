@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package tin;
+
+option go_package = ".;pb";
+
+message ESSIDRequest {}
+
+message ESSIDResponse { string value = 1; }
+
+message IPAddressRequest {}
+
+message IPAddressResponse { string value = 1; }

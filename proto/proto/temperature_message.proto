@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package tin;
+
+option go_package = ".;pb";
+
+message TemperatureRequest {}
+
+message TemperatureResponse { int32 value = 1; }

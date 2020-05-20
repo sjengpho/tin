@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package tin;
+
+option go_package = ".;pb";
+
+import "gmail_message.proto";
+import "package_manager_message.proto";
+import "temperature_message.proto";
+import "network_message.proto";
+import "config_message.proto";
+
+service TinService {
+  rpc GmailUnread(GmailUnreadRequest) returns (GmailUnreadResponse);
+  rpc GmailAuthURL(GmailAuthURLRequest) returns (GmailAuthURLResponse);
+  rpc GmailAuthCode(GmailAuthCodeRequest) returns (GmailAuthCodeResponse);
+  rpc AvailableUpdates(AvailableUpdatesRequest) returns (AvailableUpdatesResponse);
+  rpc InstalledPackagesSubscribe(InstalledPackagesRequest) returns (stream InstalledPackagesResponse);
+  rpc TemperatureCelsius(TemperatureRequest) returns (TemperatureResponse);
+  rpc TemperatureFahrenheit(TemperatureRequest) returns (TemperatureResponse);
+  rpc ESSID(ESSIDRequest) returns (ESSIDResponse);
+  rpc IPAddress(IPAddressRequest) returns (IPAddressResponse);
+  rpc Config(ConfigRequest) returns (ConfigResponse);
+}

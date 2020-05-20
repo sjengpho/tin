@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package tin;
+
+option go_package = ".;pb";
+
+message Package {
+  string name = 1;
+  string version = 2;
+}
+
+message AvailableUpdatesRequest {}
+
+message AvailableUpdatesResponse { int32 value = 1; }
+
+message InstalledPackagesRequest {}
+
+message InstalledPackagesResponse { repeated Package packages = 1; }
