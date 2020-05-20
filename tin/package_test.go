@@ -21,6 +21,14 @@ func (p packageManagerMock) AvailableUpdates() ([]Package, error) {
 	return make([]Package, 1), nil
 }
 
+func (p packageManagerMock) Installed() ([]Package, error) {
+	if p.returnError {
+		return make([]Package, 0), errors.New("error")
+	}
+
+	return make([]Package, 1), nil
+}
+
 func TestNewPackageManagerService(t *testing.T) {
 	tt := []struct {
 		want *PackageManagerService
@@ -209,6 +217,33 @@ func TestPackageCountEqualFalse(t *testing.T) {
 
 		if got != want {
 			t.Errorf("want %v, got %v", want, got)
+		}
+	}
+}
+
+func TestPackageInstalled(t *testing.T) {
+	withState := NewPackageManagerService(nil, log.New(ioutil.Discard, "", log.Flags()))
+	withState.SetInstalled([]Package{{Name: "package", Version: "1.0.0"}})
+
+	tt := []struct {
+		service *PackageManagerService
+		want    int
+	}{
+		{
+			service: withState,
+			want:    1,
+		},
+		{
+			service: NewPackageManagerService(nil, log.New(ioutil.Discard, "", log.Flags())),
+			want:    0,
+		},
+	}
+
+	for _, tc := range tt {
+		got := len(tc.service.Installed())
+
+		if got != tc.want {
+			t.Errorf("want %v, got %v", tc.want, got)
 		}
 	}
 }

@@ -9,9 +9,13 @@ import (
 )
 
 // PackageManager is the interface implemented by an object that can
-// return the amount of available updates.
+// fetch info about system packages.
+//
+// AvailableUpdates returns the packages that are updateable.
+// Installed returns the packages that are currently installed.
 type PackageManager interface {
 	AvailableUpdates() ([]Package, error)
+	Installed() ([]Package, error)
 }
 
 // PackageManagerServiceState represents the state.
@@ -63,8 +67,11 @@ func (a PackageCount) Equal(t interface{}) bool {
 	return false
 }
 
-// AvailableUpdates represents a tin.StateKey.
-const AvailableUpdates StateKey = "AvailableUpdates"
+// Represents a tin.StateKey.
+const (
+	AvailableUpdates StateKey = "AvailableUpdates"
+	Installed                 = "Installed"
+)
 
 // PackageManagerService provides access to data from package managers.
 type PackageManagerService struct {
@@ -97,6 +104,21 @@ func NewPackageManagerService(m PackageManager, l *log.Logger) *PackageManagerSe
 		})
 	}
 
+	// Worker that fetches available package updates on intervals and updates the state.
+	if m == nil {
+		s.logger.Println(errors.New("failed initializing worker"))
+	} else {
+		s.worker = NewWorker(time.Minute, func() {
+			packages, err := s.manager.Installed()
+			if err != nil {
+				s.logger.Println(fmt.Errorf("worker failed: %w", err))
+			} else {
+				s.SetInstalled(Packages(packages))
+			}
+
+		})
+	}
+
 	return s
 }
 
@@ -118,4 +140,19 @@ func (s *PackageManagerService) AvailableUpdatesCount() PackageCount {
 	}
 
 	return v.(PackageCount)
+}
+
+// SetInstalled updates the state.
+func (s *PackageManagerService) SetInstalled(p Packages) {
+	s.state.Set(Installed, p)
+}
+
+// Installed returns a slice of tin.Package.
+func (s *PackageManagerService) Installed() Packages {
+	v, err := s.state.Get(Installed)
+	if err != nil {
+		return Packages{}
+	}
+
+	return v.(Packages)
 }

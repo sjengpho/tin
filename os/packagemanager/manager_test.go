@@ -49,8 +49,8 @@ func TestNewError(t *testing.T) {
 	}
 }
 
-func TestPackageManager_AvailableUpdatesSuccess(t *testing.T) {
-	execCommand = fakeExecCommand("TestPackageManagerLookupCommandSuccess")
+func TestPackageManagerAvailableUpdatesSuccess(t *testing.T) {
+	execCommand = fakeExecCommand("TestPackageManagerAvailableUpdatesCommandSuccess")
 	defer func() { execCommand = exec.Command }()
 	pm := XBPS{}
 
@@ -60,17 +60,8 @@ func TestPackageManager_AvailableUpdatesSuccess(t *testing.T) {
 	}
 }
 
-func TestPackageManagerLookupCommandSuccess(t *testing.T) {
-	if os.Getenv("GO_TEST_PROCESS") != "1" {
-		return
-	}
-
-	fmt.Println("package-name-3.5.2_1 update x86_64 https://alpha.de.repo.voidlinux.org/current 182572180 59477905")
-	os.Exit(0)
-}
-
 func TestPackageManagerAvailableUpdatesError(t *testing.T) {
-	execCommand = fakeExecCommand("TestPackageManagerLookupCommandError")
+	execCommand = fakeExecCommand("TestPackageManagerCommandError")
 	defer func() { execCommand = exec.Command }()
 	pm := XBPS{}
 
@@ -80,10 +71,50 @@ func TestPackageManagerAvailableUpdatesError(t *testing.T) {
 	}
 }
 
-func TestPackageManagerLookupCommandError(t *testing.T) {
+func TestPackageManagerInstalledSuccess(t *testing.T) {
+	execCommand = fakeExecCommand("TestPackageManagerInstalledCommandSuccess")
+	defer func() { execCommand = exec.Command }()
+	pm := XBPS{}
+
+	_, got := pm.Installed()
+	if got != nil {
+		t.Errorf("want %v, got %v", nil, got)
+	}
+}
+
+func TestPackageManagerInstalledError(t *testing.T) {
+	execCommand = fakeExecCommand("TestPackageManagerCommandError")
+	defer func() { execCommand = exec.Command }()
+	pm := XBPS{}
+
+	_, got := pm.Installed()
+	if got == nil {
+		t.Errorf("want %v, got %v", "exit status 1", got)
+	}
+}
+
+func TestPackageManagerCommandError(t *testing.T) {
 	if os.Getenv("GO_TEST_PROCESS") != "1" {
 		return
 	}
 
 	os.Exit(1)
+}
+
+func TestPackageManagerAvailableUpdatesCommandSuccess(t *testing.T) {
+	if os.Getenv("GO_TEST_PROCESS") != "1" {
+		return
+	}
+
+	fmt.Println("package-name-3.5.2_1 update x86_64 https://alpha.de.repo.voidlinux.org/current 182572180 59477905")
+	os.Exit(0)
+}
+
+func TestPackageManagerInstalledCommandSuccess(t *testing.T) {
+	if os.Getenv("GO_TEST_PROCESS") != "1" {
+		return
+	}
+
+	fmt.Println("package-name-3.5.2_1")
+	os.Exit(0)
 }

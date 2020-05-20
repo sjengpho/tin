@@ -24,31 +24,48 @@ func New() tin.PackageManager {
 // XBPS implements tin.PackageManager.
 type XBPS struct{}
 
-// AvailableUpdates executes xbps-install in dry-run mode by
-// using -Mun as argument.
+// AvailableUpdates returns a slice of tin.Package.
 //
-// It assumes that the output contains a multiline string of packages,
-// separated by newlines. Blank lines are ignored.
+// It executes xbps-install in dry-run mode by using -Mun as argument.
 func (x *XBPS) AvailableUpdates() ([]tin.Package, error) {
 	output, err := execCommand("xbps-install", "-Mun").Output()
 	if err != nil {
 		return []tin.Package{}, err
 	}
 
+	return x.parse(string(output)), nil
+}
+
+// Installed returns a slice of tin.Package.
+//
+// It executes xbps-query -m.
+func (x *XBPS) Installed() ([]tin.Package, error) {
+	output, err := execCommand("xbps-query", "-m").Output()
+	if err != nil {
+		return []tin.Package{}, err
+	}
+
+	return x.parse(string(output)), nil
+}
+
+// parse parses the string into a slice of tin.Package.
+//
+// It assumes that the output contains a multiline string of packages,
+// separated by newlines. Blank lines are ignored.
+// Example of a line: package-name-3.5.2_1
+func (x *XBPS) parse(output string) []tin.Package {
 	pp := []tin.Package{}
-	for _, v := range strings.Split(string(output), "\n") {
+	for _, v := range strings.Split(output, "\n") {
 		if v == "" {
 			continue
 		}
 
-		// Example value of v: package-name-3.5.2_1 update x86_64 https://alpha.de.repo.voidlinux.org/current 182572180 59477905
-		s := strings.Split(v, " ")[0]  // Example: package-name-3.5.2_1
-		i := strings.LastIndex(s, "-") // Example: 12
+		p := strings.Split(v, " ")[0]  // Removing everything after the first white space.
+		i := strings.LastIndex(p, "-") // Getting the index of the seperator between the package name and version.
 		pp = append(pp, tin.Package{
-			Name:    s[:i],   // Example: package-name
-			Version: s[i+1:], // Example: 3.5.2_1
+			Name:    p[:i],   // Extracting everything from the begin until the index of the seperator.
+			Version: p[i+1:], // Extracting everything after the index of the seperator until the end.
 		})
 	}
-
-	return pp, nil
+	return pp
 }
