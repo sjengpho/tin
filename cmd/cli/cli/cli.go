@@ -6,12 +6,21 @@ import "github.com/sjengpho/tin/grpc"
 // output system related info.
 //
 // SystemUpdates outputs the available update count.
+// SystemInstalled outputs the installed packages.
 // SystemTemperatureCelsius outputs the temperature in celsius format.
 // SystemTemperatureFahrenheit outputs the temperature in fahrenheit format.
 type SystemCommander interface {
 	SystemUpdates(c *grpc.Client)
+	SystemInstalled(c *grpc.Client, flags SystemInstalledFlags)
 	SystemTemperatureCelsius(c *grpc.Client)
 	SystemTemperatureFahrenheit(c *grpc.Client)
+}
+
+// SystemInstalledFlags represents the flags.
+type SystemInstalledFlags struct {
+	Subscribe  bool
+	Export     bool
+	ExportPath string
 }
 
 // NetworkCommander is the interace implemented by an object that can

@@ -107,3 +107,32 @@ func (c *Client) Config() (*pb.ConfigResponse, error) {
 
 	return resp, nil
 }
+
+// InstalledPackages returns a pb.InstalledPackagesResponse.
+func (c *Client) InstalledPackages() (*pb.InstalledPackagesResponse, error) {
+	resp, err := c.client.InstalledPackages(context.Background(), &pb.InstalledPackagesRequest{})
+	if err != nil {
+		return &pb.InstalledPackagesResponse{}, err
+	}
+
+	return resp, nil
+}
+
+// InstalledPackagesSubscribe executes the process function when it receives a message.
+func (c *Client) InstalledPackagesSubscribe(process func(r *pb.InstalledPackagesResponse)) error {
+	stream, err := c.client.InstalledPackagesSubscribe(context.Background(), &pb.InstalledPackagesRequest{})
+	if err != nil {
+		return err
+	}
+	for {
+		t, err := stream.Recv()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		process(t)
+	}
+	return nil
+}

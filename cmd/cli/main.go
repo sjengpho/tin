@@ -42,6 +42,21 @@ func NewCmdSystem(s cli.SystemCommander, c *config) *cobra.Command {
 		},
 	})
 
+	systemInstalledFlags := cli.SystemInstalledFlags{}
+	installedPackagesCmd := &cobra.Command{
+		Use:   "installed",
+		Short: "Installed packages",
+		Long:  `Installed packages`,
+		Run: func(cmd *cobra.Command, args []string) {
+
+			s.SystemInstalled(cli.NewClient(c.port), systemInstalledFlags)
+		},
+	}
+	installedPackagesCmd.PersistentFlags().BoolVar(&systemInstalledFlags.Subscribe, "subscribe", false, "Automatically process changes")
+	installedPackagesCmd.PersistentFlags().BoolVar(&systemInstalledFlags.Export, "export", false, "Creates a CSV export")
+	installedPackagesCmd.PersistentFlags().StringVar(&systemInstalledFlags.ExportPath, "exportPath", "", "CSV export path")
+	cmd.AddCommand(installedPackagesCmd)
+
 	cmd.AddCommand(&cobra.Command{
 		Use:   "celsius",
 		Short: "Temperature celsius",

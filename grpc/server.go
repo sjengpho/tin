@@ -100,7 +100,7 @@ func (s *Server) Temperature(c context.Context, r *pb.TemperatureRequest) (*pb.T
 	temperature := &pb.Temperature{
 		Celsius:    int32(t.Celsius()),
 		Fahrenheit: int32(t.Fahrenheit()),
-}
+	}
 	return &pb.TemperatureResponse{Temperature: temperature}, nil
 }
 
@@ -120,9 +120,44 @@ func (s *Server) IPAddress(c context.Context, r *pb.IPAddressRequest) (*pb.IPAdd
 func (s *Server) Config(c context.Context, r *pb.ConfigRequest) (*pb.ConfigResponse, error) {
 	resp := &pb.ConfigResponse{
 		Config: &pb.Config{
-		GmailCredentials: s.config.GmailCredentials,
-		GmailToken:       s.config.GmailToken,
+			GmailCredentials: s.config.GmailCredentials,
+			GmailToken:       s.config.GmailToken,
 		},
 	}
 	return resp, nil
+}
+
+// InstalledPackages returns a pb.InstalledInstalledPackagesResponse.
+func (s *Server) InstalledPackages(c context.Context, r *pb.InstalledPackagesRequest) (*pb.InstalledPackagesResponse, error) {
+	packages := []*pb.Package{}
+	for _, p := range s.packageManagerService.Installed() {
+		packages = append(packages, &pb.Package{
+			Name:    p.Name,
+			Version: p.Version,
+		})
+	}
+
+	return &pb.InstalledPackagesResponse{Packages: packages}, nil
+}
+
+// InstalledPackagesSubscribe returns a stream of pb.InstalledPackagesResponse.
+func (s *Server) InstalledPackagesSubscribe(r *pb.InstalledPackagesRequest, stream pb.TinService_InstalledPackagesSubscribeServer) error {
+	subscription := s.packageManagerService.Subscribe()
+	for v := range subscription.Channel {
+		if pp, ok := v.(tin.Packages); ok {
+			packages := []*pb.Package{}
+			for _, p := range pp {
+				packages = append(packages, &pb.Package{
+					Name:    p.Name,
+					Version: p.Version,
+				})
+			}
+
+			if err := stream.Send(&pb.InstalledPackagesResponse{Packages: packages}); err != nil {
+				subscription.Close()
+				return err
+			}
+		}
+	}
+	return nil
 }
