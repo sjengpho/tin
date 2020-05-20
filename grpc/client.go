@@ -40,24 +40,14 @@ func (c *Client) AvailableUpdates() (int, error) {
 	return int(resp.GetValue()), nil
 }
 
-// TemperatureCelsius returns a integer.
-func (c *Client) TemperatureCelsius() (int, error) {
-	resp, err := c.client.TemperatureCelsius(context.Background(), &pb.TemperatureRequest{})
+// Temperature returns a pb.TemperatureResponse.
+func (c *Client) Temperature() (*pb.TemperatureResponse, error) {
+	resp, err := c.client.Temperature(context.Background(), &pb.TemperatureRequest{})
 	if err != nil {
-		return 0, err
+		return &pb.TemperatureResponse{}, err
 	}
 
-	return int(resp.GetValue()), nil
-}
-
-// TemperatureFahrenheit returns a integer.
-func (c *Client) TemperatureFahrenheit() (int, error) {
-	resp, err := c.client.TemperatureFahrenheit(context.Background(), &pb.TemperatureRequest{})
-	if err != nil {
-		return 0, err
-	}
-
-	return int(resp.GetValue()), nil
+	return resp, nil
 }
 
 // GmailUnread returns a integer.

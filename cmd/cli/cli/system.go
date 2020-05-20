@@ -27,20 +27,20 @@ func (s *systemCommander) SystemUpdates(c *grpc.Client) {
 
 // SystemTemperatureCelsius outputs the temperature in celsius format.
 func (s *systemCommander) SystemTemperatureCelsius(c *grpc.Client) {
-	v, err := c.TemperatureCelsius()
+	v, err := c.Temperature()
 	if err != nil {
 		log.Printf("failed getting the temperature: %v", err)
 		return
 	}
-	fmt.Println(v)
+	fmt.Println(v.GetTemperature().GetCelsius())
 }
 
 // SystemTemperatureFahrenheit outputs the temperature in celsius format.
 func (s *systemCommander) SystemTemperatureFahrenheit(c *grpc.Client) {
-	v, err := c.TemperatureFahrenheit()
+	v, err := c.Temperature()
 	if err != nil {
 		log.Printf("failed getting the temperature: %v", err)
 		return
 	}
-	fmt.Println(v)
+	fmt.Println(v.GetTemperature().GetFahrenheit())
 }

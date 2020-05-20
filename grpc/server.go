@@ -94,16 +94,14 @@ func (s *Server) AvailableUpdates(c context.Context, r *pb.AvailableUpdatesReque
 	return &pb.AvailableUpdatesResponse{Value: int32(u)}, nil
 }
 
-// TemperatureCelsius returns a pb.TemperatureResponse.
-func (s *Server) TemperatureCelsius(c context.Context, r *pb.TemperatureRequest) (*pb.TemperatureResponse, error) {
+// Temperature returns a pb.TemperatureResponse.
+func (s *Server) Temperature(c context.Context, r *pb.TemperatureRequest) (*pb.TemperatureResponse, error) {
 	t := s.temperatureService.Temperature()
-	return &pb.TemperatureResponse{Value: int32(t.Celsius())}, nil
+	temperature := &pb.Temperature{
+		Celsius:    int32(t.Celsius()),
+		Fahrenheit: int32(t.Fahrenheit()),
 }
-
-// TemperatureFahrenheit returns a pb.TemperatureResponse.
-func (s *Server) TemperatureFahrenheit(c context.Context, r *pb.TemperatureRequest) (*pb.TemperatureResponse, error) {
-	t := s.temperatureService.Temperature()
-	return &pb.TemperatureResponse{Value: int32(t.Fahrenheit())}, nil
+	return &pb.TemperatureResponse{Temperature: temperature}, nil
 }
 
 // ESSID returns a pb.NetworkNameResponse.

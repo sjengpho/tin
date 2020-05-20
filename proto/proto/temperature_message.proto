@@ -4,6 +4,11 @@ package tin;
 
 option go_package = ".;pb";
 
+message Temperature {
+    int32 celsius = 1;
+    int32 fahrenheit = 2;
+}
+
 message TemperatureRequest {}
 
-message TemperatureResponse { int32 value = 1; }
+message TemperatureResponse { Temperature temperature = 1; }

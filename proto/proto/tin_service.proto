@@ -16,8 +16,7 @@ service TinService {
   rpc GmailAuthCode(GmailAuthCodeRequest) returns (GmailAuthCodeResponse);
   rpc AvailableUpdates(AvailableUpdatesRequest) returns (AvailableUpdatesResponse);
   rpc InstalledPackagesSubscribe(InstalledPackagesRequest) returns (stream InstalledPackagesResponse);
-  rpc TemperatureCelsius(TemperatureRequest) returns (TemperatureResponse);
-  rpc TemperatureFahrenheit(TemperatureRequest) returns (TemperatureResponse);
+  rpc Temperature(TemperatureRequest) returns (TemperatureResponse);
   rpc ESSID(ESSIDRequest) returns (ESSIDResponse);
   rpc IPAddress(IPAddressRequest) returns (IPAddressResponse);
   rpc Config(ConfigRequest) returns (ConfigResponse);
