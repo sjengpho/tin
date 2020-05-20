@@ -38,6 +38,7 @@ The data can be anything that is useful for the user.
 | :----------------------- | ---------: |
 | Temperature              | Void Linux |
 | Available system updates | Void Linux |
+| Installed packages       | Void Linux |
 
 ### Network
 
