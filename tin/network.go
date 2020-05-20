@@ -14,19 +14,37 @@ type ESSIDLookup interface {
 	Lookup() (ESSID, error)
 }
 
-// ESSID represents the network name.
-type ESSID string
-
 // PublicIPLookup is the interface implemented by an object that can
 // lookup the IP, City and Country.
 type PublicIPLookup interface {
 	Lookup() (PublicIP, error)
 }
 
-// PublicIP represents the IP address.
-type PublicIP = net.IP
+// ESSID represents the network name.
+type ESSID string
 
-// Represents tin.StateKeys.
+// Equal implements tin.Comparable.
+func (a ESSID) Equal(t interface{}) bool {
+	if b, ok := t.(ESSID); ok {
+		return a == b
+	}
+	return false
+}
+
+// PublicIP represents the IP address.
+type PublicIP struct {
+	net.IP
+}
+
+// Equal implements tin.Comparable.
+func (a PublicIP) Equal(t interface{}) bool {
+	if b, ok := t.(PublicIP); ok {
+		return a.String() == b.String()
+	}
+	return false
+}
+
+// Represents tin.StateKey.
 const (
 	NetworkName StateKey = "NetworkName"
 	IP                   = "IP"

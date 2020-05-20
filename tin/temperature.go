@@ -18,6 +18,14 @@ type Temperature struct {
 	Value int // Celsius
 }
 
+// Equal implements tin.Comparable.
+func (t Temperature) Equal(v interface{}) bool {
+	if b, ok := v.(Temperature); ok {
+		return t.Value == b.Value
+	}
+	return false
+}
+
 // Celsius returns the temperature in Celsius format.
 func (t *Temperature) Celsius() int {
 	return t.Value

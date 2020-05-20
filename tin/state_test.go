@@ -5,6 +5,10 @@ import (
 	"testing"
 )
 
+type fakeNumber int
+
+func (a fakeNumber) Equal(b interface{}) bool { return a == b }
+
 func TestNewState(t *testing.T) {
 	want := &State{}
 	got := NewState()
@@ -16,7 +20,8 @@ func TestNewState(t *testing.T) {
 
 func TestStateSetAndGet(t *testing.T) {
 	s := NewState()
-	s.Set("number", 7)
+	s.Set("number", fakeNumber(7))
+	s.Set("number", fakeNumber(7))
 
 	tt := []struct {
 		key  StateKey
@@ -24,7 +29,7 @@ func TestStateSetAndGet(t *testing.T) {
 	}{
 		{
 			"number",
-			7,
+			fakeNumber(7),
 		},
 		{
 			"invalid",
@@ -60,16 +65,29 @@ func TestStatePublish(t *testing.T) {
 	subscription := s.Subscribe()
 	key := StateKey("key")
 
-	s.publish(StateMessage{key: key, value: 4})
-	s.publish(StateMessage{key: key, value: 17})
-	s.publish(StateMessage{key: key, value: 1})
-	s.publish(StateMessage{key: key, value: 2})
-	s.publish(StateMessage{key: key, value: 3})
-	s.publish(StateMessage{key: key, value: 4})
-	s.publish(StateMessage{key: key, value: 7})
+	s.publish(StateMessage{key: key, value: fakeNumber(4)})
+	s.publish(StateMessage{key: key, value: fakeNumber(17)})
+	s.publish(StateMessage{key: key, value: fakeNumber(1)})
+	s.publish(StateMessage{key: key, value: fakeNumber(2)})
+	s.publish(StateMessage{key: key, value: fakeNumber(3)})
+	s.publish(StateMessage{key: key, value: fakeNumber(4)})
+	s.publish(StateMessage{key: key, value: fakeNumber(7)})
 
-	want := 7
+	want := fakeNumber(7)
 	got := <-subscription.Channel
+	if got != want {
+		t.Errorf("want %v, got %v", want, got)
+	}
+}
+
+func TestStateSubscriptionClose(t *testing.T) {
+	s := NewState()
+	a := s.Subscribe()
+	s.Subscribe()
+	a.Close()
+
+	want := 1
+	got := len(s.subscribers)
 	if got != want {
 		t.Errorf("want %v, got %v", want, got)
 	}

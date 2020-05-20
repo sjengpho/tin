@@ -83,3 +83,43 @@ func TestMailUnreadMailCount(t *testing.T) {
 		}
 	}
 }
+
+func TestMailCountEqualTrue(t *testing.T) {
+	a := MailCount(1)
+	b := MailCount(1)
+
+	want := true
+	got := a.Equal(b)
+	if got != want {
+		t.Errorf("want %v, got %v", want, got)
+	}
+}
+
+func TestMailCountEqualFalse(t *testing.T) {
+	tt := []struct {
+		a MailCount
+		b interface{}
+	}{
+		{
+			a: MailCount(1),
+			b: MailCount(2),
+		},
+		{
+			a: MailCount(1),
+			b: 1,
+		},
+		{
+			a: MailCount(1),
+			b: 2,
+		},
+	}
+
+	for _, tc := range tt {
+		want := false
+		got := tc.a.Equal(tc.b)
+
+		if got != want {
+			t.Errorf("want %v, got %v", want, got)
+		}
+	}
+}

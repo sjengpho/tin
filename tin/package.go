@@ -20,14 +20,48 @@ type PackageManagerServiceState struct {
 	AvailableUpdates PackageCount
 }
 
+// Packages represents a slice of tin.Package.
+type Packages []Package
+
+// Equal implements tin.Comparable.
+func (a Packages) Equal(t interface{}) bool {
+	b, ok := t.(Packages)
+	if !ok || len(a) != len(b) {
+		return false
+	}
+
+	for i, v := range a {
+		if !v.Equal(b[i]) {
+			return false
+		}
+	}
+	return true
+}
+
 // Package represents a package from a package manager.
 type Package struct {
 	Name    string
 	Version string
 }
 
+// Equal implements tin.Comparable.
+func (a Package) Equal(t interface{}) bool {
+	if b, ok := t.(Package); ok {
+		return a == b
+	}
+	return false
+}
+
 // PackageCount represents the amount of packages.
-type PackageCount = int
+type PackageCount int
+
+// Equal implements tin.Comparable.
+func (a PackageCount) Equal(t interface{}) bool {
+	if b, ok := t.(PackageCount); ok {
+		return a == b
+	}
+	return false
+}
 
 // AvailableUpdates represents a tin.StateKey.
 const AvailableUpdates StateKey = "AvailableUpdates"

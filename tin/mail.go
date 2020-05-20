@@ -21,6 +21,14 @@ type Mail struct {
 // MailCount represents a mail count.
 type MailCount int
 
+// Equal implements tin.Comparable.
+func (a MailCount) Equal(t interface{}) bool {
+	if b, ok := t.(MailCount); ok {
+		return a == b
+	}
+	return false
+}
+
 // UnreadMailCount represents a tin.StateKey.
 const UnreadMailCount StateKey = "UnreadMailCount"
 

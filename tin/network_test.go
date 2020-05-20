@@ -114,7 +114,7 @@ func TestNetworkSetName(t *testing.T) {
 
 func TestNetworkIP(t *testing.T) {
 	withState := NewNetworkService(nil, nil, log.New(ioutil.Discard, "", log.Flags()))
-	withState.SetIP(net.IPv4(0, 0, 0, 0))
+	withState.SetIP(PublicIP{net.IPv4(0, 0, 0, 0)})
 
 	tt := []struct {
 		service *NetworkService
@@ -135,6 +135,86 @@ func TestNetworkIP(t *testing.T) {
 
 		if !reflect.DeepEqual(got, tc.want) {
 			t.Errorf("want %v, got %v", tc.want, got)
+		}
+	}
+}
+
+func TestESSIDEqualTrue(t *testing.T) {
+	a := ESSID("WIFI_NAME")
+	b := ESSID("WIFI_NAME")
+
+	want := true
+	got := a.Equal(b)
+	if got != want {
+		t.Errorf("want %v, got %v", want, got)
+	}
+}
+
+func TestESSIDEqualFalse(t *testing.T) {
+	tt := []struct {
+		a ESSID
+		b interface{}
+	}{
+		{
+			a: ESSID("WIFI_NAME_A"),
+			b: ESSID("WIFI_NAME_B"),
+		},
+		{
+			a: ESSID("WIFI_NAME_A"),
+			b: "WIFI_NAME_A",
+		},
+		{
+			a: ESSID("WIFI_NAME_A"),
+			b: "WIFI_NAME_B",
+		},
+	}
+
+	for _, tc := range tt {
+		want := false
+		got := tc.a.Equal(tc.b)
+
+		if got != want {
+			t.Errorf("want %v, got %v", want, got)
+		}
+	}
+}
+
+func TestPublicIPEqualTrue(t *testing.T) {
+	a := PublicIP{IP: net.ParseIP("127.0.0.1")}
+	b := PublicIP{IP: net.ParseIP("127.0.0.1")}
+
+	want := true
+	got := a.Equal(b)
+	if got != want {
+		t.Errorf("want %v, got %v", want, got)
+	}
+}
+
+func TestPublicIPEqualFalse(t *testing.T) {
+	tt := []struct {
+		a PublicIP
+		b interface{}
+	}{
+		{
+			a: PublicIP{IP: net.ParseIP("127.0.0.1")},
+			b: PublicIP{IP: net.ParseIP("0.0.0.0")},
+		},
+		{
+			a: PublicIP{IP: net.ParseIP("127.0.0.1")},
+			b: "127.0.0.1",
+		},
+		{
+			a: PublicIP{IP: net.ParseIP("127.0.0.1")},
+			b: "0.0.0.0",
+		},
+	}
+
+	for _, tc := range tt {
+		want := false
+		got := tc.a.Equal(tc.b)
+
+		if got != want {
+			t.Errorf("want %v, got %v", want, got)
 		}
 	}
 }

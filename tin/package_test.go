@@ -83,3 +83,132 @@ func TestPackageAvailableUpdatesCount(t *testing.T) {
 		}
 	}
 }
+
+func TestPackagesEqualTrue(t *testing.T) {
+	a := Packages{
+		Package{Name: "Name", Version: "1.0.0"},
+		Package{Name: "Package", Version: "1.0.1"},
+	}
+	b := Packages{
+		Package{Name: "Name", Version: "1.0.0"},
+		Package{Name: "Package", Version: "1.0.1"},
+	}
+
+	want := true
+	got := a.Equal(b)
+	if got != want {
+		t.Errorf("want %v, got %v", want, got)
+	}
+}
+
+func TestPackagesEqualFalse(t *testing.T) {
+	tt := []struct {
+		a Packages
+		b interface{}
+	}{
+		{
+			a: Packages{Package{Name: "Name", Version: "1.0.0"}},
+			b: Packages{Package{Name: "Name", Version: "1.0.1"}},
+		},
+		{
+			a: Packages{Package{Name: "Name", Version: "1.0.0"}},
+			b: Packages{
+				Package{Name: "Name", Version: "1.0.1"},
+				Package{Name: "Name", Version: "1.0.2"},
+			},
+		},
+		{
+			a: Packages{Package{Name: "Name", Version: "1.0.0"}},
+			b: Packages{Package{Name: "Package", Version: "1.0.0"}},
+		},
+		{
+			a: Packages{Package{Name: "Name", Version: "1.0.0"}},
+			b: "package",
+		},
+	}
+
+	for _, tc := range tt {
+		want := false
+		got := tc.a.Equal(tc.b)
+
+		if got != want {
+			t.Errorf("want %v, got %v", want, got)
+		}
+	}
+}
+
+func TestPackageEqualTrue(t *testing.T) {
+	a := Package{Name: "Name", Version: "1.0.0"}
+	b := Package{Name: "Name", Version: "1.0.0"}
+
+	want := true
+	got := a.Equal(b)
+	if got != want {
+		t.Errorf("want %v, got %v", want, got)
+	}
+}
+
+func TestPackageEqualFalse(t *testing.T) {
+	tt := []struct {
+		a Package
+		b interface{}
+	}{
+		{
+			a: Package{Name: "Name", Version: "1.0.0"},
+			b: Package{Name: "Name", Version: "1.0.1"},
+		},
+		{
+			a: Package{Name: "Name", Version: "1.0.0"},
+			b: Package{Name: "Package", Version: "1.0.0"},
+		},
+		{
+			a: Package{Name: "Name", Version: "1.0.0"},
+			b: "package",
+		},
+	}
+
+	for _, tc := range tt {
+		want := false
+		got := tc.a.Equal(tc.b)
+
+		if got != want {
+			t.Errorf("want %v, got %v", want, got)
+		}
+	}
+}
+
+func TestPackageCountEqualTrue(t *testing.T) {
+	a := PackageCount(7)
+	b := PackageCount(7)
+
+	want := true
+	got := a.Equal(b)
+	if got != want {
+		t.Errorf("want %v, got %v", want, got)
+	}
+}
+
+func TestPackageCountEqualFalse(t *testing.T) {
+	tt := []struct {
+		a PackageCount
+		b interface{}
+	}{
+		{
+			a: PackageCount(7),
+			b: PackageCount(17),
+		},
+		{
+			a: PackageCount(7),
+			b: 7,
+		},
+	}
+
+	for _, tc := range tt {
+		want := false
+		got := tc.a.Equal(tc.b)
+
+		if got != want {
+			t.Errorf("want %v, got %v", want, got)
+		}
+	}
+}

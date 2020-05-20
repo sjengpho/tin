@@ -29,7 +29,9 @@ type State struct {
 type StateKey string
 
 // StateValue represents the value of a state.
-type StateValue interface{}
+type StateValue interface {
+	Comparable
+}
 
 // StateMessage holds a StateKey and StateValue.
 type StateMessage struct {
@@ -76,9 +78,11 @@ func (s *State) Get(k StateKey) (StateValue, error) {
 // Set updates the state and sends the value to the subscribers.
 func (s *State) Set(k StateKey, v StateValue) {
 	s.Lock()
-	s.values[k] = v
+	if old, exists := s.values[k]; !exists || !v.Equal(old) {
+		s.values[k] = v
+		s.publish(StateMessage{key: k, value: v})
+	}
 	s.Unlock()
-	s.publish(StateMessage{key: k, value: v})
 }
 
 // Subscribe creates and returns a tin.StateSubscription.

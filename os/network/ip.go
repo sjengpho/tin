@@ -52,11 +52,11 @@ func (i *ipLookupper) Lookup() (tin.PublicIP, error) {
 	case i := <-ch:
 		cancel()
 		close(ch)
-		return i, nil
+		return tin.PublicIP{IP: i}, nil
 	case <-ctx.Done():
 		cancel()
 		close(ch)
-		return nil, ErrTimeout
+		return tin.PublicIP{}, ErrTimeout
 	}
 }
 

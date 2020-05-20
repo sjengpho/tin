@@ -93,3 +93,39 @@ func TestTemperatureFahrenheit(t *testing.T) {
 		t.Errorf("want %v, got %v", want, got)
 	}
 }
+
+func TestTemperatureEqualTrue(t *testing.T) {
+	a := Temperature{Value: 17}
+	b := Temperature{Value: 17}
+
+	want := true
+	got := a.Equal(b)
+	if got != want {
+		t.Errorf("want %v, got %v", want, got)
+	}
+}
+
+func TestTemperatureEqualFalse(t *testing.T) {
+	tt := []struct {
+		a Temperature
+		b interface{}
+	}{
+		{
+			a: Temperature{Value: 17},
+			b: Temperature{Value: 7},
+		},
+		{
+			a: Temperature{Value: 7},
+			b: 7,
+		},
+	}
+
+	for _, tc := range tt {
+		want := false
+		got := tc.a.Equal(tc.b)
+
+		if got != want {
+			t.Errorf("want %v, got %v", want, got)
+		}
+	}
+}
