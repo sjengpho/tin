@@ -37,7 +37,7 @@ func (s *gmailCommander) Login(c *grpc.Client) {
 		return
 	}
 
-	fmt.Printf("Visit the link below to retreive authorization code\n\n%v\n\n", authURL)
+	fmt.Printf("Visit the link below to retrieve an authorization code\n\n%v\n\n", authURL)
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Print("Authorization code: ")
 	code, _ := reader.ReadString('\n')

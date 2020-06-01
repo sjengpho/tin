@@ -61,10 +61,10 @@ func (x *XBPS) parse(output string) []tin.Package {
 		}
 
 		p := strings.Split(v, " ")[0]  // Removing everything after the first white space.
-		i := strings.LastIndex(p, "-") // Getting the index of the seperator between the package name and version.
+		i := strings.LastIndex(p, "-") // Getting the index of the separator between the package name and version.
 		pp = append(pp, tin.Package{
-			Name:    p[:i],   // Extracting everything from the begin until the index of the seperator.
-			Version: p[i+1:], // Extracting everything after the index of the seperator until the end.
+			Name:    p[:i],   // Extracting everything from the begin until the index of the separator.
+			Version: p[i+1:], // Extracting everything after the index of the separator until the end.
 		})
 	}
 	return pp

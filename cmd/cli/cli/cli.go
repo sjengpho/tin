@@ -2,7 +2,7 @@ package cli
 
 import "github.com/sjengpho/tin/grpc"
 
-// SystemCommander is the interace implemented by an object that can
+// SystemCommander is the interface implemented by an object that can
 // output system related info.
 //
 // SystemUpdates outputs the available update count.
@@ -23,7 +23,7 @@ type SystemInstalledFlags struct {
 	ExportPath string
 }
 
-// NetworkCommander is the interace implemented by an object that can
+// NetworkCommander is the interface implemented by an object that can
 // output network related info.
 //
 // ESSID outputs the network name.
@@ -33,7 +33,7 @@ type NetworkCommander interface {
 	IP(c *grpc.Client)
 }
 
-// GmailCommander is the interace implemented by an object that can
+// GmailCommander is the interface implemented by an object that can
 // output gmail related info.
 //
 // Login attempts to authorize the user at Gmail.
