@@ -63,6 +63,9 @@ func (i *ipLookupper) Lookup() (tin.PublicIP, error) {
 // lookup fetches the IP address and sends the result to the channel.
 func (i *ipLookupper) lookup(ctx context.Context, url string, ch chan net.IP) {
 	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return
+	}
 	req = req.WithContext(ctx)
 
 	resp, err := http.DefaultClient.Do(req)
