@@ -51,6 +51,9 @@ func (s *Service) UnreadMails() ([]tin.Mail, error) {
 	msgs := resp.Messages
 	for resp.NextPageToken != "" {
 		resp, err = client.List("me").Q("is:unread").PageToken(resp.NextPageToken).Do()
+		if err != nil {
+			return []tin.Mail{}, fmt.Errorf("Failed fetching unread mails: %w", err)
+		}
 		msgs = append(msgs, resp.Messages...)
 	}
 
