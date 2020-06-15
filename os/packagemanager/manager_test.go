@@ -7,14 +7,38 @@ import (
 	"os/exec"
 	"reflect"
 	"testing"
+
+	"github.com/sjengpho/tin/tin"
 )
 
-func fakeLookPathSuccess(file string) (string, error) {
+func fakeLookPathXBPS(file string) (string, error) {
+	if file != "xbps-install" {
+		return "", errors.New("executeable doesn't exists")
+	}
+
+	return "fake-path", nil
+}
+
+func fakeLookPathPacman(file string) (string, error) {
+	if file != "checkupdates" {
+		return "", errors.New("executeable doesn't exists")
+	}
+
 	return "fake-path", nil
 }
 
 func fakeLookPathError(file string) (string, error) {
 	return "", errors.New("executeable doesn't exists")
+}
+
+type fakeYay struct{}
+
+func (f fakeYay) Installed() ([]tin.Package, error) {
+	return []tin.Package{}, errors.New("error")
+}
+
+func (f fakeYay) AvailableUpdates() ([]tin.Package, error) {
+	return []tin.Package{}, errors.New("error")
 }
 
 func fakeExecCommand(commandName string) func(name string, args ...string) *exec.Cmd {
@@ -28,13 +52,30 @@ func fakeExecCommand(commandName string) func(name string, args ...string) *exec
 }
 
 func TestNewSuccess(t *testing.T) {
-	lookPath = fakeLookPathSuccess
-	defer func() { lookPath = exec.LookPath }()
+	tests := []struct {
+		want         tin.PackageManager
+		fakeLookPath func(file string) (string, error)
+	}{
+		{
+			want:         &XBPS{},
+			fakeLookPath: fakeLookPathXBPS,
+		},
+		{
+			want:         &Arch{},
+			fakeLookPath: fakeLookPathPacman,
+		},
+	}
 
-	want := reflect.TypeOf(&XBPS{})
-	got := reflect.TypeOf(New())
-	if got != want {
-		t.Errorf("want %v, got %v", want, got)
+	for _, tt := range tests {
+		lookPath = tt.fakeLookPath
+
+		got := reflect.TypeOf(New())
+		want := reflect.TypeOf(tt.want)
+		if got != want {
+			t.Errorf("want %v, got %v", want, got)
+		}
+
+		lookPath = exec.LookPath
 	}
 }
 
@@ -49,51 +90,147 @@ func TestNewError(t *testing.T) {
 	}
 }
 
-func TestPackageManagerAvailableUpdatesSuccess(t *testing.T) {
-	execCommand = fakeExecCommand("TestPackageManagerAvailableUpdatesCommandSuccess")
-	defer func() { execCommand = exec.Command }()
-	pm := XBPS{}
+func TestAvailableUpdatesSuccess(t *testing.T) {
+	tests := []struct {
+		pm              tin.PackageManager
+		fakeExecCommand func(name string, args ...string) *exec.Cmd
+	}{
+		{
+			pm:              &XBPS{},
+			fakeExecCommand: fakeExecCommand("TestXBPSAvailableUpdatesCommandSuccess"),
+		},
+		{
+			pm:              &Arch{Pacman: Pacman{}, AUR: &Yay{}},
+			fakeExecCommand: fakeExecCommand("TestArchCommandSuccess"),
+		},
+		{
+			pm:              &Pacman{},
+			fakeExecCommand: fakeExecCommand("TestArchCommandSuccess"),
+		},
+		{
+			pm:              &Yay{},
+			fakeExecCommand: fakeExecCommand("TestArchCommandSuccess"),
+		},
+	}
 
-	_, got := pm.AvailableUpdates()
-	if got != nil {
-		t.Errorf("want %v, got %v", nil, got)
+	for _, tt := range tests {
+		execCommand = tt.fakeExecCommand
+
+		_, got := tt.pm.AvailableUpdates()
+		if got != nil {
+			t.Errorf("want %v, got %v", nil, got)
+		}
+
+		execCommand = exec.Command
 	}
 }
 
-func TestPackageManagerAvailableUpdatesError(t *testing.T) {
-	execCommand = fakeExecCommand("TestPackageManagerCommandError")
-	defer func() { execCommand = exec.Command }()
-	pm := XBPS{}
+func TestAvailableUpdatesError(t *testing.T) {
+	tests := []struct {
+		pm              tin.PackageManager
+		fakeExecCommand func(name string, args ...string) *exec.Cmd
+	}{
+		{
+			pm:              &XBPS{},
+			fakeExecCommand: fakeExecCommand("TestCommandError"),
+		},
+		{
+			pm:              &Arch{Pacman: Pacman{}, AUR: &Yay{}},
+			fakeExecCommand: fakeExecCommand("TestCommandError"),
+		},
+		{
+			pm:              &Arch{Pacman: Pacman{}, AUR: fakeYay{}},
+			fakeExecCommand: fakeExecCommand("TestArchCommandSuccess"),
+		},
+		{
+			pm:              &Pacman{},
+			fakeExecCommand: fakeExecCommand("TestCommandError"),
+		},
+		{
+			pm:              &Yay{},
+			fakeExecCommand: fakeExecCommand("TestCommandError"),
+		},
+	}
 
-	_, got := pm.AvailableUpdates()
-	if got == nil {
-		t.Errorf("want %v, got %v", "exit status 1", got)
+	for _, tt := range tests {
+		execCommand = tt.fakeExecCommand
+
+		_, got := tt.pm.AvailableUpdates()
+		if got == nil {
+			t.Errorf("want %v, got %v", nil, got)
+		}
+
+		execCommand = exec.Command
 	}
 }
 
-func TestPackageManagerInstalledSuccess(t *testing.T) {
-	execCommand = fakeExecCommand("TestPackageManagerInstalledCommandSuccess")
-	defer func() { execCommand = exec.Command }()
-	pm := XBPS{}
+func TestInstalledSuccess(t *testing.T) {
+	tests := []struct {
+		pm              tin.PackageManager
+		fakeExecCommand func(name string, args ...string) *exec.Cmd
+	}{
+		{
+			pm:              &XBPS{},
+			fakeExecCommand: fakeExecCommand("TestXBPSInstalledCommandSuccess"),
+		},
+		{
+			pm:              &Arch{Pacman: Pacman{}, AUR: &Yay{}},
+			fakeExecCommand: fakeExecCommand("TestArchCommandSuccess"),
+		},
+		{
+			pm:              &Pacman{},
+			fakeExecCommand: fakeExecCommand("TestArchCommandSuccess"),
+		},
+	}
 
-	_, got := pm.Installed()
-	if got != nil {
-		t.Errorf("want %v, got %v", nil, got)
+	for _, tt := range tests {
+		execCommand = tt.fakeExecCommand
+
+		_, got := tt.pm.Installed()
+		if got != nil {
+			t.Errorf("want %v, got %v", nil, got)
+		}
+
+		execCommand = exec.Command
 	}
 }
 
-func TestPackageManagerInstalledError(t *testing.T) {
-	execCommand = fakeExecCommand("TestPackageManagerCommandError")
-	defer func() { execCommand = exec.Command }()
-	pm := XBPS{}
+func TestInstalledError(t *testing.T) {
+	tests := []struct {
+		pm              tin.PackageManager
+		fakeExecCommand func(name string, args ...string) *exec.Cmd
+	}{
+		{
+			pm:              &XBPS{},
+			fakeExecCommand: fakeExecCommand("TestCommandError"),
+		},
+		{
+			pm:              &Arch{Pacman: Pacman{}, AUR: &Yay{}},
+			fakeExecCommand: fakeExecCommand("TestCommandError"),
+		},
+		{
+			pm:              &Pacman{},
+			fakeExecCommand: fakeExecCommand("TestCommandError"),
+		},
+		{
+			pm:              &Yay{},
+			fakeExecCommand: fakeExecCommand("TestCommandError"),
+		},
+	}
 
-	_, got := pm.Installed()
-	if got == nil {
-		t.Errorf("want %v, got %v", "exit status 1", got)
+	for _, tt := range tests {
+		execCommand = tt.fakeExecCommand
+
+		_, got := tt.pm.Installed()
+		if got == nil {
+			t.Errorf("want %v, got %v", nil, got)
+		}
+
+		execCommand = exec.Command
 	}
 }
 
-func TestPackageManagerCommandError(t *testing.T) {
+func TestCommandError(t *testing.T) {
 	if os.Getenv("GO_TEST_PROCESS") != "1" {
 		return
 	}
@@ -101,7 +238,7 @@ func TestPackageManagerCommandError(t *testing.T) {
 	os.Exit(1)
 }
 
-func TestPackageManagerAvailableUpdatesCommandSuccess(t *testing.T) {
+func TestXBPSAvailableUpdatesCommandSuccess(t *testing.T) {
 	if os.Getenv("GO_TEST_PROCESS") != "1" {
 		return
 	}
@@ -110,11 +247,20 @@ func TestPackageManagerAvailableUpdatesCommandSuccess(t *testing.T) {
 	os.Exit(0)
 }
 
-func TestPackageManagerInstalledCommandSuccess(t *testing.T) {
+func TestXBPSInstalledCommandSuccess(t *testing.T) {
 	if os.Getenv("GO_TEST_PROCESS") != "1" {
 		return
 	}
 
 	fmt.Println("package-name-3.5.2_1")
+	os.Exit(0)
+}
+
+func TestArchCommandSuccess(t *testing.T) {
+	if os.Getenv("GO_TEST_PROCESS") != "1" {
+		return
+	}
+
+	fmt.Println("package-name 3.5.2-1")
 	os.Exit(0)
 }

@@ -34,18 +34,18 @@ The data can be anything that is useful for the user.
 
 ### Operating system
 
-| Data                     |  Supported |
-| :----------------------- | ---------: |
-| Temperature              | Void Linux |
-| Available system updates | Void Linux |
-| Installed packages       | Void Linux |
+| Data                     |         Supported |
+| :----------------------- | ----------------: |
+| Temperature              |             Linux |
+| Available system updates | XBPS, Pacman, Yay |
+| Installed packages       |      XBPS, Pacman |
 
 ### Network
 
 | Data      |  Supported |
 | :-------- | ---------: |
 | ESSID     | Void Linux |
-| Public IP | Void Linux |
+| Public IP |      Linux |
 
 ### Mail providers
 
