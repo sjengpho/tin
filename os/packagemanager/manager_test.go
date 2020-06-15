@@ -108,6 +108,10 @@ func TestAvailableUpdatesSuccess(t *testing.T) {
 			fakeExecCommand: fakeExecCommand("TestArchCommandSuccess"),
 		},
 		{
+			pm:              &Pacman{},
+			fakeExecCommand: fakeExecCommand("TestCommandExitCode2"),
+		},
+		{
 			pm:              &Yay{},
 			fakeExecCommand: fakeExecCommand("TestArchCommandSuccess"),
 		},
@@ -236,6 +240,14 @@ func TestCommandError(t *testing.T) {
 	}
 
 	os.Exit(1)
+}
+
+func TestCommandExitCode2(t *testing.T) {
+	if os.Getenv("GO_TEST_PROCESS") != "1" {
+		return
+	}
+
+	os.Exit(2)
 }
 
 func TestXBPSAvailableUpdatesCommandSuccess(t *testing.T) {

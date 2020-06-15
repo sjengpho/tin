@@ -113,6 +113,11 @@ type Pacman struct{}
 func (p *Pacman) AvailableUpdates() ([]tin.Package, error) {
 	output, err := execCommand("checkupdates").Output()
 	if err != nil {
+		var e *exec.ExitError
+		// Assuming exit code 2 means no updates.
+		if errors.As(err, &e) && e.ExitCode() == 2 {
+			return []tin.Package{}, nil
+		}
 		return []tin.Package{}, err
 	}
 
