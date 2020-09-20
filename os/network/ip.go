@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/sjengpho/tin/tin"
@@ -38,30 +39,37 @@ type ipLookupper struct {
 func (i *ipLookupper) Lookup() (tin.PublicIP, error) {
 	ctx := context.Background()
 	ctx, cancel := context.WithTimeout(ctx, i.timeout)
+	defer cancel()
 
-	// requesting the IP address from the sources.
+	// Requesting the IP address from the sources.
+	var wg sync.WaitGroup
 	ch := make(chan net.IP, 1)
 	for _, s := range i.sources {
-		go i.lookup(ctx, s, ch)
+		wg.Add(1)
+		go i.lookup(ctx, s, ch, &wg)
 	}
 
-	// cleaning up and cancelling the other requests when one of the sources
+	// Cleaning up channel.
+	go func() {
+		wg.Wait()
+		close(ch)
+	}()
+
+	// Cancelling the other requests when one of the sources
 	// has returned a result. When the deadline has exceeded and none of the
 	// sources has returned a result an error is returned.
 	select {
 	case i := <-ch:
-		cancel()
-		close(ch)
 		return tin.PublicIP{IP: i}, nil
 	case <-ctx.Done():
-		cancel()
-		close(ch)
 		return tin.PublicIP{}, ErrTimeout
 	}
 }
 
 // lookup fetches the IP address and sends the result to the channel.
-func (i *ipLookupper) lookup(ctx context.Context, url string, ch chan net.IP) {
+func (i *ipLookupper) lookup(ctx context.Context, url string, ch chan net.IP, wg *sync.WaitGroup) {
+	defer wg.Done()
+
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return
