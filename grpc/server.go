@@ -14,6 +14,8 @@ import (
 	"github.com/sjengpho/tin/proto/pb"
 	"github.com/sjengpho/tin/tin"
 
+	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
 	"google.golang.org/grpc"
 )
 
@@ -54,7 +56,8 @@ func (s *Server) ListenAndServe(port int) error {
 		return err
 	}
 
-	grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer(grpc_middleware.WithUnaryServerChain(grpc_recovery.UnaryServerInterceptor()))
+
 	pb.RegisterTinServiceServer(grpcServer, s)
 
 	log.Printf("Listening on %v", address)
